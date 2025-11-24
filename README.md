@@ -1,69 +1,104 @@
-# Sistema de Atención al Cliente
+# Agente de IA para Atención al Cliente
 
-Este proyecto implementa un Agente de Inteligencia Artificial diseñado para automatizar y mejorar la atención al cliente en el Hospital Clínico San Borja Arriarán. El agente utiliza una arquitectura modular (Agente Coordinador, LLM y RAG) para manejar solicitudes administrativas comunes (estado de horas, farmacia, reclamos)
+## Descripción del Proyecto
 
-## Arquitectura y Frameworks
-
-El diseño se basa en la **orquestación de herramientas**, un patrón clave en los **Frameworks de Agentes** (ej. LangChain, Autogen). Esta arquitectura garantiza escalabilidad y compatibilidad técnica al separar las responsabilidades de cada componente.
-
-| Componente | Framework Simulado | Función (Herramienta) | Tipo de Integración |
-| :--- | :--- | :--- | :--- |
-| **Agente Coordinador** | Python/LangChain Agent | **Razonamiento** y **Planificación** | Orquesta el flujo de trabajo (decide clasificar, usar RAG o derivar). |
-| **Clasificación/LLM** | GPT-3.5/Gemini | **Escritura** y **Razonamiento** | Interpreta el lenguaje natural, genera respuestas claras. |
-| **RAG Pipeline** | ChromaDB + Sentence Transformer | **Consulta** y **Recuperación** | Accede a información contextual (protocolos, normativas) del hospital. |
+Este proyecto implementa un **Agente de Inteligencia Artificial Modular** diseñado para optimizar la atención al cliente en el **Hospital Clínico San Borja Arriarán**. La solución se centra en la orquestación de herramientas, la gestión de memoria y la toma de decisiones adaptativa, garantizando la **trazabilidad** completa de las interacciones.
 
 ---
 
-## Diagrama de Orquestación de Componentes
+## 1. Arquitectura y Componentes del Agente
 
-El siguiente diagrama visualiza el flujo de información y la integración modular del agente, mostrando cómo el Agente Coordinador gestiona las herramientas y la memoria para tomar decisiones.
+La arquitectura se basa en un patrón de orquestación donde el Agente Coordinador dirige el flujo de trabajo, asegurando que se utilicen las herramientas correctas en cada etapa.
 
+### 1.1. Estructura de Componentes
 
+| Componente | Función Principal | Rol en el Flujo |
+| :--- | :--- | :--- |
+| **Agente Coordinador** | Control de Flujo y Planificación | Decide la ruta. |
+| **LLM / Clasificación** | Razonamiento | Categoriza la intención de la consulta. |
+| **Pipeline RAG** | Consulta y Recuperación | Accede a la Base de Conocimiento verificada para soporte contextual. |
 
-**Flujo de Orquestación Clave:**
-1.  **Clasificación (Razonamiento):** El Agente clasifica la consulta para determinar la prioridad de la tarea.
-2.  **Consulta (RAG):** Se activa la **Recuperación Semántica** para obtener contexto relevante de la Base de Conocimiento.
-3.  **Toma de Decisiones (IE6):** Basado en la clasificación y el éxito/falla del RAG, se decide el flujo: Respuesta Automática o Derivación Humana.
-4.  **Memoria:** Se registra la interacción para asegurar la coherencia en la siguiente pregunta.
+### 1.2. Herramientas Funcionales
 
----
+El sistema integra las siguientes herramientas programáticas:
 
-## Integración de Herramientas
+1.  **`clasificacion()`**: Identifica la intención para la planificación.
+2.  **`contexto()`**: Recupera información específica de la Base de Conocimiento (Memoria de Largo Plazo).
+3.  **`generador_respuesta()`**: Formula la respuesta final, usando contexto RAG y memoria.
 
-El Agente Coordinador integra las siguientes herramientas funcionales para operar con autonomía:
+**Diagrama de Orquestación de Componentes**
 
-1.  **Herramienta de Razonamiento (`clasificacion`):** Identifica la intención de la consulta para derivar el flujo de manera autónoma.
-    * *Ejemplo de Decisión:* Si detecta "cambiar hora", activa el flujo de reprogramación.
-2.  **Herramienta de Consulta (`contexto` - RAG):** Busca contexto específico en la base de conocimiento para responder preguntas frecuentes y complejas, asegurando precisión.
-    * *Simulación:* Busca `horarios_visita` o `farmacia_disponibilidad`.
-3.  **Herramienta de Escritura (`generador_respuesta`):** Utiliza el contexto del RAG y el LLM para formular una respuesta amigable, simulando un "diálogo humano".
-
----
-
-## Mecanismos de Memoria y Contexto
-
-Para mantener la coherencia en tareas prolongadas, el agente integra dos tipos de memoria:
-
-### Memoria de Corto Plazo
-* **Mecanismo:** `self.memory_buffer` (Simulación de *Conversation Buffer*).
-* **Función:** Almacena los últimos $K$ turnos de la conversación. Esto permite al agente mantener el hilo de un reclamo o una secuencia de preguntas sobre un mismo tema, asegurando la continuidad efectiva del flujo.
-
-### Memoria de Largo Plazo
-* **Mecanismo:** **Pipeline RAG** (Simulación de **Recuperación Semántica**).
-* **Función:** Accede a la `self.knowledge_base`) para recuperar fragmentos de texto basados en la similitud semántica con la consulta del paciente, garantizando que la respuesta sea precisa, contextual y verificable según los protocolos del hospital.
 
 ---
 
-## Decisiones de Diseño Clave
+## 2. Mecanismos de Inteligencia y Planificación
 
-La elección de los componentes del agente está alineada con los requerimientos de reducir la carga administrativa y mejorar la precisión:
+### 2.1. Gestión de Memoria
 
-* **Implementación del RAG:** Es fundamental para garantizar que las respuestas sean **verificables** y basadas en la **normativa vigente**, superando las limitaciones de la memoria de entrenamiento del LLM.
-* **Agente Coordinador:** Necesario para **separar la lógica de negocio** (escalamiento, trazabilidad) de la lógica lingüística, facilitando el mantenimiento y la auditoría.
-* **Derivación Condicional:** La decisión de derivar automáticamente los `reclamos` (independientemente del RAG) es una política de diseño para **garantizar la trazabilidad** y liberar al funcionario solo para tareas de gestión crítica.
+| Mecanismo | Implementación | Propósito |
+| :--- | :--- | :--- |
+| **Memoria de Corto Plazo** | `self.memory_buffer` (Buffer de los últimos 3 turnos) | Mantiene la **coherencia** de la conversación en flujos prolongados. |
+| **Memoria de Largo Plazo** | `self.knowledge_base` (Base RAG) | Asegura la **precisión** y la verificabilidad de las respuestas con protocolos hospitalarios. |
+
+### 2.2. Planificación Adaptativa
+
+El Agente ajusta su **comportamiento adaptativo** basándose en la clasificación y el resultado de la búsqueda RAG:
+
+| Condición | Decisión de Planificación | Justificación |
+| :--- | :--- | :--- |
+| **pregunta_frecuente** + Contexto | **Respuesta Autónoma** | Alta confianza, eficiencia. |
+| **reclamo** | **Derivación Obligatoria** | Política de **trazabilidad** y registro legal. |
+| **otra_consulta** + Sin Contexto | **Derivación Condicional** | Complejidad o límite del conocimiento del sistema. |
 
 ---
 
-## 🚀 Instalación y Ejecución
+## 3. Observabilidad y Trazabilidad
 
-**Prerrequisitos:** Python 3.9+
+La monitorización continua es vital para la fiabilidad operativa del Agente.
+
+### 3.1. Métricas Implementadas
+
+Las siguientes métricas se rastrean en `self.metrics` para evaluar el desempeño:
+
+1.  **Latencia Promedio (ms)**: Mide la velocidad de respuesta (Rendimiento).
+2.  **Precisión de Respuesta Autónoma (%)**: Mide la efectividad del Agente sin intervención humana.
+3.  **Tasa de Derivación Humana (%)**: Mide la frecuencia de escalamiento.
+
+### 3.2. Dashboards de Monitoreo
+
+Se requiere un dashboard visual (ej. Grafana, Streamlit) para visualizar el comportamiento del Agente.
+
+
+
+### 3.3. Análisis de Logs y Trazabilidad
+
+Cada interacción genera un log de trazabilidad que captura la ruta de decisión y el rendimiento (`turn_latency_ms`), esencial para la auditoría:
+
+**Hallazgo Típico:** La alta tasa de derivación humana en categorías ambiguas indica un **déficit en la Base de Conocimiento RAG**, justificando la necesidad de expansión y curación de datos.
+
+---
+
+## 4. Propuesta de Recomendaciones de Optimización
+
+Las siguientes recomendaciones están justificadas por el análisis de métricas y la trazabilidad operativa:
+
+| Objetivo | Recomendación Práctica | Justificación |
+| :--- | :--- | :--- |
+| **Aumentar Precisión** | Expandir el RAG con consultas que resultaron en derivación. | Reducir la **Tasa de Derivación Humana**. |
+| **Mejorar Rendimiento** | Implementar **Caching de Respuestas** para consultas frecuentes. | Reducir la **Latencia Promedio** y el consumo de recursos. |
+| **Mejorar Razonamiento** | Refinar el clasificador con técnicas de *Few-Shot Prompting*. | Minimizar la **Tasa de Error de Clasificación** en el log. |
+
+---
+
+## 5. Instalación y Ejecución
+
+El código fuente del Agente se encuentra en `HospitalAIAgent.py`.
+
+### 5.1. Requisitos
+* Python 3.9
+
+### 5.2. Comando de Ejecución
+Ejecute el script para iniciar la simulación de turnos y generar el reporte final de métricas:
+
+```bash
+python HospitalAIAgent.py
